@@ -48,3 +48,7 @@ void Pipeline_CheckAttributeLocation(const Pipeline_Program program, const char*
   (attribute_location != specified_location) ?
   App_Fatal("Attribute %s is at location=%d instead of location=%d, fatal.\n", name, attribute_location, specified_location) : "Ok.";
 }
+Pipeline_Texture_Unit unit_counter = GL_TEXTURE0;
+Pipeline_Texture_Unit Pipeline_NewTextureUnit() {
+  return unit_counter++;
+}

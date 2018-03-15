@@ -9,4 +9,6 @@ typedef GLint Pipeline_Uniform;
 Pipeline_Uniform Pipeline_GetUniform(const Pipeline_Program program, const char* name);
 void Pipeline_CheckAttributeLocation(const Pipeline_Program program, const char* name, const GLint specified_location);
 /* Make sure to use a program before updating the camera! */
+typedef GLuint Pipeline_Texture_Unit;
+Pipeline_Texture_Unit Pipeline_NewTextureUnit();
 #endif

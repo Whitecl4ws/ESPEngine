@@ -1,6 +1,6 @@
-top top.bmp
-bottom bottom.bmp
-front front.bmp
-back back.bmp
-right right.bmp
-left left.bmp
+top assets/skyboxes/three.bmp
+bottom assets/skyboxes/two.bmp
+front assets/skyboxes/five.bmp
+back assets/skyboxes/six.bmp
+right assets/skyboxes/one.bmp
+left assets/skyboxes/four.bmp

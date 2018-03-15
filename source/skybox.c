@@ -50,9 +50,10 @@ const float cube_vertices[] = {
   -1.0, -1.0,  1.0,
    1.0, -1.0,  1.0
 };
-Pipeline_Skybox* Skybox_Create(const char* path) {
+Pipeline_Skybox* Skybox_Create(const Pipeline_Program program, const char* path) {
   Pipeline_Skybox* skybox = calloc(1, sizeof(Pipeline_Skybox));
   FILE* file = File_Open(path, "r");
+  skybox->view_matrix_location = Pipeline_GetUniform(program, "viewmatrix");
 
   char face[16], imagepath[64];
   #define StringsEqual(s1, s2) (!strcmp(s1, s2))
@@ -62,11 +63,15 @@ Pipeline_Skybox* Skybox_Create(const char* path) {
     (!StringsEqual(format[i], face)) ?
     App_Fatal("%s face was given instead of %s face, fatal.\n", face, format[i]) : "Ok.";
     skybox->faces[i].data = stbi_load(imagepath, &skybox->faces[i].width, &skybox->faces[i].height, NULL, 3);
+    (skybox->faces[i].data == NULL) ?
+    App_Fatal("Failed to stbi_load %s, fatal.\n", imagepath) : "Ok.";
+    /* Make the imagepathes relative instead of relatively absolute! */
   }
 
   glGenTextures(1, &skybox->texture);
   /* For now! */
-  glActiveTexture(GL_TEXTURE0);
+  skybox->texture_unit = Pipeline_NewTextureUnit();
+  glActiveTexture(skybox->texture_unit);
   glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->texture);
   for(int i = 0; i < 6; ++i) {
     glTexImage2D(gl_format[i], 0, GL_RGB, skybox->faces[i].width,
@@ -77,6 +82,7 @@ Pipeline_Skybox* Skybox_Create(const char* path) {
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glUniform1i(Pipeline_GetUniform(program, "cube_texture"), skybox->texture_unit - GL_TEXTURE0);
 
   glGenVertexArrays(1, &skybox->vert_array);
   glGenBuffers(1, &skybox->mesh);
@@ -94,9 +100,14 @@ Pipeline_Skybox* Skybox_Create(const char* path) {
 }
 void Skybox_Render(const Pipeline_Skybox* skybox,
   const Pipeline_Camera* camera, const Pipeline_Program program) {
+    glDepthMask(GL_FALSE);
     glUseProgram(program);
+    glUniformMatrix4fv(skybox->view_matrix_location, 1, GL_FALSE, camera->rotation.mat);
+    glActiveTexture(skybox->texture_unit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->texture);
     glBindVertexArray(skybox->vert_array);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDepthMask(GL_TRUE);
 }
 void Skybox_Destroy(Pipeline_Skybox** _skybox) {
   /* TODO: fully clean the vertex buffer! */

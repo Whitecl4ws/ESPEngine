@@ -5,6 +5,7 @@
 #include "includes/renderer.h"
 #include "includes/camera.h"
 #include "includes/mesh.h"
+#include "includes/skybox.h"
 void App_Fatal(const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
@@ -54,10 +55,18 @@ int main(const int argc, char const *argv[]) {
   Camera_Update(camera);
   glfwSetKeyCallback(window, Callback_Keyboard_PressOnce);
 
+  glUseProgram(program[1]);
+  uniform = Pipeline_GetUniform(program[1], "projection");
+  glUniformMatrix4fv(uniform, 1, GL_FALSE, projection.mat);
+  Pipeline_Skybox* skybox = Skybox_Create(program[1], "assets/skyboxes/cloudy.skybox");
+  glfwSwapInterval(1);
+
+  /* Setup a gameloop! */
   while(!glfwWindowShouldClose(window)) {
     glfwPollEvents();
     Keyboard_KeyDownListener(window);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Skybox_Render(skybox, camera, program[1]);
     glUseProgram(program[0]);
     glUniform1f(uniforms[0], glfwGetTime());
     Instance_Renderer_RenderMesh(renderer, 0);

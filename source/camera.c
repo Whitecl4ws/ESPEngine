@@ -4,6 +4,7 @@
 Pipeline_Camera* Pipeline_CreateCamera(Pipeline_Program program) {
   Pipeline_Camera* camera = calloc(1, sizeof(Pipeline_Camera));
   camera->view_matrix_location = Pipeline_GetUniform(program, "viewmatrix");
+  kmMat4Identity(&camera->rotation);
   camera->direction.x = 1;
   return camera;
 }
@@ -28,6 +29,8 @@ void Camera_Update_Rotation(Pipeline_Camera* camera) {
   camera->direction.y = sin(theta);
   camera->direction.x = cos(theta) * cos(phi);
   camera->direction.z = cos(theta) * sin(phi);
+  kmVec3 zero = {0};
+  kmMat4LookAt(&camera->rotation, &zero, &camera->direction, &UP);
   kmVec3Cross(&camera->axis, &camera->direction, &UP);
   Camera_Update(camera);
 }

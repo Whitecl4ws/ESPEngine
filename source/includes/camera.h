@@ -5,6 +5,7 @@
 /* compile kazmath! */
 typedef struct {
   kmVec3 position, direction, axis;
+  kmMat4 rotation;
   kmVec2 mouse_position, previous_position;
   Pipeline_Uniform view_matrix_location;
 } Pipeline_Camera;
